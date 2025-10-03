@@ -1,15 +1,18 @@
 import { useRef, useEffect } from "react";
 import { Event } from "../types/calendar";
+import { UserEvent } from "../types/user";
+import { useUsers } from "../contexts/UserContext";
+import { getUserName, getUserColor } from "../utils/userAssignments";
 
 type Props = {
-  event: Event;
+  event: UserEvent;
   top: number;
   height: number;
   isDraggable: boolean;
   isBeingDragged: boolean;
   isDisabled?: boolean;
   transform: string;
-  onEventEdit: (event: Event) => void;
+  onEventEdit: (event: UserEvent) => void;
   onDragStart: () => void;
   onResizeStart?: (type: "top" | "bottom") => void;
 };
@@ -46,7 +49,22 @@ export default function DraggableEvent({
   onDragStart,
   onResizeStart,
 }: Props) {
+  const { users } = useUsers();
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
+
+  // Get background color - prioritize user color if event is assigned
+  const getEventBackgroundColor = () => {
+    if (event.assignedUsers && event.assignedUsers.length > 0) {
+      // Use the first assigned user's color
+      const firstUserId = event.assignedUsers[0].userId;
+      const userColor = getUserColor(firstUserId, users);
+      return userColor;
+    }
+    // Fallback to generated color if no user assigned
+    return pastelColorFromString(
+      event._calendarId || event.id || event.summary || "cal"
+    );
+  };
   const hasDragged = useRef(false);
   const wasBeingDragged = useRef(false);
   const pendingOperation = useRef<
@@ -65,9 +83,7 @@ export default function DraggableEvent({
     }
   }, [isBeingDragged]);
 
-  const bg = pastelColorFromString(
-    event._calendarId || event.id || event.summary || "cal"
-  );
+  const bg = getEventBackgroundColor();
 
   return (
     <div
@@ -216,18 +232,52 @@ export default function DraggableEvent({
           <div className="text-xs text-slate-700">{eventTimeLabel(event)}</div>
         </div>
 
-        {/* Avatar/initial at bottom-right */}
-        <div className="flex justify-end">
-          <div
-            className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center text-[10px] font-semibold"
-            style={{
-              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.6)",
-            }}
-          >
-            {event.creator?.email
-              ? (event.creator.email[0] || "U").toUpperCase()
-              : (event._calendarId || "C")[0]?.toUpperCase()}
-          </div>
+        {/* User assignment indicators at bottom-right */}
+        <div className="flex justify-end gap-1">
+          {event.assignedUsers && event.assignedUsers.length > 0 ? (
+            event.assignedUsers.slice(0, 3).map((assignment, index) => {
+              const userName = getUserName(assignment.userId, users);
+              const userColor = getUserColor(assignment.userId, users);
+              return (
+                <div
+                  key={assignment.userId}
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-semibold border border-white/60 text-white"
+                  style={{
+                    backgroundColor: userColor,
+                    marginLeft: index > 0 ? "-4px" : "0", // Overlap slightly for multiple users
+                    zIndex: event.assignedUsers!.length - index,
+                  }}
+                  title={`Assigned to: ${userName}`}
+                >
+                  {userName[0]?.toUpperCase() || "U"}
+                </div>
+              );
+            })
+          ) : (
+            <div
+              className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center text-[10px] font-semibold"
+              style={{
+                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.6)",
+              }}
+              title={
+                event.creator?.email
+                  ? `Creator: ${event.creator.email}`
+                  : "Unknown creator"
+              }
+            >
+              {event.creator?.email
+                ? (event.creator.email[0] || "U").toUpperCase()
+                : (event._calendarId || "C")[0]?.toUpperCase()}
+            </div>
+          )}
+          {event.assignedUsers && event.assignedUsers.length > 3 && (
+            <div
+              className="w-5 h-5 rounded-full bg-gray-400/90 flex items-center justify-center text-[8px] font-semibold text-white border border-white/60"
+              title={`+${event.assignedUsers.length - 3} more assigned users`}
+            >
+              +{event.assignedUsers.length - 3}
+            </div>
+          )}
         </div>
       </div>
 

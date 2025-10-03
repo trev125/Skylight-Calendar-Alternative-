@@ -1,9 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import {
+  convertEventsToUserEvents,
+  filterEventsByUser,
+  autoAssignEventByCreator,
+  eventToUserEvent,
+  assignUnassignedEventsToUser,
+} from "../utils/userAssignments";
 import EventModal from "./EventModal";
 import WeekView from "./WeekView";
 import MonthView from "./MonthView";
 import CalendarControls from "./CalendarControls";
 import { Event, SelectedCalendar } from "../types/calendar";
+import { UserEvent } from "../types/user";
+import { useUsers } from "../contexts/UserContext";
 
 type Props = {
   selectedCalendars: SelectedCalendar[];
@@ -26,11 +35,12 @@ export default function CalendarView({
   selectedCalendars,
   availableCalendars,
 }: Props) {
+  const { selectedUserId, users } = useUsers();
   const [mode, setMode] = useState<"month" | "week">("week");
   const [cursor, setCursor] = useState(new Date());
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<UserEvent[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Event | null>(null);
+  const [editing, setEditing] = useState<UserEvent | null>(null);
   const [modalInitial, setModalInitial] = useState<{
     start?: string;
     end?: string;
@@ -150,11 +160,28 @@ export default function CalendarView({
 
     const merged = results.flatMap((res: any, idx: number) => {
       const sel = selectedCalendars[idx];
-      const list = (res.items || []).map((it: any) => ({
-        ...it,
-        _calendarId: sel.calendarId,
-        _accountToken: sel.accountToken,
-      }));
+      const list = (res.items || []).map((it: any) => {
+        // Convert to UserEvent and add calendar metadata
+        const event: Event = {
+          ...it,
+          _calendarId: sel.calendarId,
+          _accountToken: sel.accountToken,
+        };
+
+        // Convert to UserEvent with assignment capabilities
+        let userEvent = eventToUserEvent(event);
+
+        // Auto-assign based on creator email if possible
+        userEvent = autoAssignEventByCreator(userEvent, users);
+
+        // If still unassigned, assign to the first user (Dad) as default
+        // You can change this to any user ID you prefer
+        if (!userEvent.assignedUsers || userEvent.assignedUsers.length === 0) {
+          userEvent = assignUnassignedEventsToUser(userEvent, "dad");
+        }
+
+        return userEvent;
+      });
       console.debug(
         `Fetched ${list.length} events for calendar ${sel.calendarId}`
       );
@@ -168,6 +195,11 @@ export default function CalendarView({
   useEffect(() => {
     fetchEvents();
   }, [selectedCalendars.map((s) => s.id).join("|"), mode, cursor]);
+
+  // Filter events by selected user
+  const filteredEvents = useMemo(() => {
+    return filterEventsByUser(events, selectedUserId);
+  }, [events, selectedUserId]);
 
   useEffect(() => {
     const handler = () => {
@@ -245,7 +277,7 @@ export default function CalendarView({
     }
   };
 
-  const handleEventEdit = (event: Event) => {
+  const handleEventEdit = (event: UserEvent) => {
     setEditing(event);
     setModalInitial(null);
     setModalOpen(true);
@@ -283,7 +315,7 @@ export default function CalendarView({
       {mode === "month" ? (
         <MonthView
           cursor={cursor}
-          events={events}
+          events={filteredEvents}
           selectedCalendars={selectedCalendars}
           onEventEdit={handleEventEdit}
           onQuickCreate={handleQuickCreate}
@@ -291,7 +323,7 @@ export default function CalendarView({
       ) : (
         <WeekView
           cursor={cursor}
-          events={events}
+          events={filteredEvents}
           selectedCalendars={selectedCalendars}
           onEventEdit={handleEventEdit}
           onQuickCreate={handleQuickCreate}

@@ -1,13 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import WeekDay from "./WeekDay";
 import TimeGrid from "./TimeGrid";
-import { Event } from "../types/calendar";
+import { Event, SelectedCalendar } from "../types/calendar";
+import { UserEvent } from "../types/user";
 
 type Props = {
   cursor: Date;
-  events: Event[];
+  events: UserEvent[];
   selectedCalendars: any[];
-  onEventEdit: (event: Event) => void;
+  onEventEdit: (event: UserEvent) => void;
   onQuickCreate: (start: Date, end: Date, calendarId?: string) => void;
   onEventUpdate: (
     eventId: string,

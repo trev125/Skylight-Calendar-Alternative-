@@ -6,6 +6,7 @@ import CalendarView from "./components/CalendarView";
 import TopBar from "./components/TopBar";
 import LeftRail from "./components/LeftRail";
 import { ToastsProvider, useToasts } from "./components/Toasts";
+import { UserProvider } from "./contexts/UserContext";
 
 type Account = { token: string; email?: string; name?: string };
 type SelectedCalendar = {
@@ -69,6 +70,13 @@ export default function App() {
     });
   };
 
+  const handleAccountUpdate = (updated: Account[]) => {
+    setAccounts(updated);
+    try {
+      localStorage.setItem("cr_accounts", JSON.stringify(updated));
+    } catch {}
+  };
+
   // allow CalendarSelector to report all available calendars (flattened)
   const handleAvailableCalendars = useCallback((cals: SelectedCalendar[]) => {
     setAvailableCalendars(cals);
@@ -126,117 +134,63 @@ export default function App() {
 
   const [debugOpen, setDebugOpen] = useState(false);
 
-  const handleRefresh = useCallback((updated: Account[]) => {
-    setAccounts(updated);
-    try {
-      localStorage.setItem("cr_accounts", JSON.stringify(updated));
-    } catch {}
-  }, []);
-
   return (
-    <ToastsProvider>
-      <div className="min-h-screen bg-gray-100 text-slate-900">
-        <TopBar />
-        <div className="max-w-screen-[1920px] mx-auto p-4 flex gap-6">
-          <LeftRail />
-          <div className="flex-1 min-w-0">
-            <header className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-semibold">Calendar Replacement</h1>
-              <div className="flex items-center space-x-4">
-                <AuthButton onAddAccount={addAccount} />
-                <DebugInfo />
-              </div>
-            </header>
-
-            <div className="mb-4 p-2 bg-white rounded">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium">Debug panel</div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    className="px-2 py-1 rounded bg-gray-100 text-sm"
-                    onClick={() => runDiagnostics()}
-                  >
-                    Run Diagnostics
-                  </button>
-                  <button
-                    className="px-2 py-1 rounded bg-gray-50 text-sm"
-                    onClick={() => setDebugOpen((s) => !s)}
-                  >
-                    {debugOpen ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </div>
-              <div
-                className={`mt-2 text-xs text-gray-700 ${
-                  debugOpen ? "block" : "hidden"
-                }`}
-              >
-                <div>
-                  <strong>Persisted accounts:</strong>
-                  <pre className="text-[10px] max-h-40 overflow-auto bg-slate-50 p-2 mt-1">
-                    {JSON.stringify(accountsRaw, null, 2)}
-                  </pre>
-                </div>
-                <div className="mt-2">
-                  <strong>Available calendars (flattened):</strong>
-                  <pre className="text-[10px] max-h-40 overflow-auto bg-slate-50 p-2 mt-1">
-                    {JSON.stringify(availableCalendars, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            </div>
-
-            {accounts.length > 0 ? (
-              <main>
+    <UserProvider>
+      <ToastsProvider>
+        <div className="min-h-screen bg-slate-50 flex flex-col">
+          <TopBar />
+          <main className="flex-1 flex">
+            <LeftRail />
+            <div className="flex-1 p-6">
+              <div className="max-w-screen-xl mx-auto space-y-6">
+                {availableCalendars.length === 0 && (
+                  <AuthButton onAddAccount={addAccount} />
+                )}
                 <CalendarSelector
                   accounts={accounts}
                   onChange={setSelected}
                   onAvailable={handleAvailableCalendars}
-                  onRefresh={handleRefresh}
+                  onRefresh={handleAccountUpdate}
                 />
                 <CalendarView
                   selectedCalendars={selected}
                   availableCalendars={availableCalendars}
                 />
-              </main>
-            ) : (
-              <p>
-                Please connect at least one Google account to view calendars.
-              </p>
-            )}
-          </div>
-        </div>
-        {/* Floating action button to create new event */}
-        <button
-          aria-label="Add event"
-          title="Add event"
-          onClick={(e) => {
-            // ripple
-            const btn = e.currentTarget as HTMLButtonElement;
-            const rect = btn.getBoundingClientRect();
-            const ripple = document.createElement("span");
-            ripple.className = "ripple";
-            ripple.style.left = `${e.clientX - rect.left - 6}px`;
-            ripple.style.top = `${e.clientY - rect.top - 6}px`;
-            btn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-            // dispatch event to open modal
-            window.dispatchEvent(new CustomEvent("cr:open-new-event"));
-          }}
-          className="fixed right-8 bottom-8 w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+              </div>
+            </div>
+          </main>
+
+          <DebugInfo />
+
+          <button
+            onClick={(e) => {
+              const btn = e.currentTarget;
+              const rect = btn.getBoundingClientRect();
+              const ripple = document.createElement("div");
+              ripple.className =
+                "absolute w-3 h-3 bg-white/30 rounded-full animate-ping pointer-events-none";
+              ripple.style.left = `${e.clientX - rect.left - 6}px`;
+              ripple.style.top = `${e.clientY - rect.top - 6}px`;
+              btn.appendChild(ripple);
+              setTimeout(() => ripple.remove(), 600);
+              // dispatch event to open modal
+              window.dispatchEvent(new CustomEvent("cr:open-new-event"));
+            }}
+            className="fixed right-8 bottom-8 w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg"
           >
-            <path d="M12 5v14M5 12h14" stroke="white" />
-          </svg>
-        </button>
-      </div>
-    </ToastsProvider>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 5v14M5 12h14" stroke="white" />
+            </svg>
+          </button>
+        </div>
+      </ToastsProvider>
+    </UserProvider>
   );
 }

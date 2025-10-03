@@ -1,11 +1,12 @@
 import { useRef, useEffect } from "react";
 import { Event } from "../types/calendar";
+import { UserEvent } from "../types/user";
 import DraggableEvent from "./DraggableEvent";
 
 type Props = {
   day: Date;
   dayIndex: number;
-  events: Event[];
+  events: UserEvent[];
   selectedCalendars: any[];
   dayStartHour: number;
   dayEndHour: number;
@@ -13,7 +14,7 @@ type Props = {
   containerHeight: number;
   dragState: any;
   pendingUpdates?: Set<string>;
-  onEventEdit: (event: Event) => void;
+  onEventEdit: (event: UserEvent) => void;
   onQuickCreate: (start: Date, end: Date, calendarId?: string) => void;
   onEventUpdate: (
     eventId: string,

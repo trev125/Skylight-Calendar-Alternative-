@@ -1,10 +1,11 @@
 import { Event } from "../types/calendar";
+import { UserEvent } from "../types/user";
 
 type Props = {
   cursor: Date;
-  events: Event[];
+  events: UserEvent[];
   selectedCalendars: any[];
-  onEventEdit: (event: Event) => void;
+  onEventEdit: (event: UserEvent) => void;
   onQuickCreate: (start: Date, end: Date, calendarId?: string) => void;
 };
 
