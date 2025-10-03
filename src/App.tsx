@@ -7,6 +7,8 @@ import TopBar from "./components/TopBar";
 import LeftRail from "./components/LeftRail";
 import { ToastsProvider, useToasts } from "./components/Toasts";
 import { UserProvider } from "./contexts/UserContext";
+import { ChoresProvider } from "./contexts/ChoresContext";
+import ChoresPage from "./components/ChoresPage";
 
 type Account = { token: string; email?: string; name?: string };
 type SelectedCalendar = {
@@ -30,6 +32,7 @@ export default function App() {
   const [availableCalendars, setAvailableCalendars] = useState<
     SelectedCalendar[]
   >([]);
+  const [currentPage, setCurrentPage] = useState<"calendar" | "chores">("calendar");
 
   useEffect(() => {
     // try to refresh tokens for persisted accounts (best-effort)
@@ -136,29 +139,65 @@ export default function App() {
 
   return (
     <UserProvider>
-      <ToastsProvider>
-        <div className="min-h-screen bg-slate-50 flex flex-col">
-          <TopBar />
-          <main className="flex-1 flex">
-            <LeftRail />
-            <div className="flex-1 p-6">
-              <div className="max-w-screen-xl mx-auto space-y-6">
-                {availableCalendars.length === 0 && (
-                  <AuthButton onAddAccount={addAccount} />
-                )}
-                <CalendarSelector
-                  accounts={accounts}
-                  onChange={setSelected}
-                  onAvailable={handleAvailableCalendars}
-                  onRefresh={handleAccountUpdate}
-                />
-                <CalendarView
-                  selectedCalendars={selected}
-                  availableCalendars={availableCalendars}
-                />
+      <ChoresProvider>
+        <ToastsProvider>
+          <div className="min-h-screen bg-slate-50 flex flex-col">
+            <TopBar />
+            
+            {/* Navigation */}
+            <div className="bg-white border-b">
+              <div className="max-w-screen-xl mx-auto px-6">
+                <nav className="flex space-x-8">
+                  <button
+                    onClick={() => setCurrentPage("calendar")}
+                    className={`py-4 border-b-2 font-medium text-sm ${
+                      currentPage === "calendar"
+                        ? "border-blue-600 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    Calendar
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage("chores")}
+                    className={`py-4 border-b-2 font-medium text-sm ${
+                      currentPage === "chores"
+                        ? "border-blue-600 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    Chores
+                  </button>
+                </nav>
               </div>
             </div>
-          </main>
+
+            <main className="flex-1">
+              {currentPage === "calendar" ? (
+                <div className="flex h-full">
+                  <LeftRail />
+                  <div className="flex-1 p-6">
+                    <div className="max-w-screen-xl mx-auto space-y-6">
+                      {availableCalendars.length === 0 && (
+                        <AuthButton onAddAccount={addAccount} />
+                      )}
+                      <CalendarSelector
+                        accounts={accounts}
+                        onChange={setSelected}
+                        onAvailable={handleAvailableCalendars}
+                        onRefresh={handleAccountUpdate}
+                      />
+                      <CalendarView
+                        selectedCalendars={selected}
+                        availableCalendars={availableCalendars}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <ChoresPage />
+              )}
+            </main>
 
           <DebugInfo />
 
@@ -189,8 +228,9 @@ export default function App() {
               <path d="M12 5v14M5 12h14" stroke="white" />
             </svg>
           </button>
-        </div>
-      </ToastsProvider>
+          </div>
+        </ToastsProvider>
+      </ChoresProvider>
     </UserProvider>
   );
 }

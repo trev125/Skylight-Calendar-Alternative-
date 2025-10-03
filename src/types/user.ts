@@ -42,11 +42,13 @@ export interface UserEvent extends AssignableItem {
 }
 
 // Future types for extensibility
+export type ChoreStatus = "todo" | "in-progress" | "review" | "completed";
+
 export interface Chore extends AssignableItem {
   title: string;
   description?: string;
   dueDate?: Date;
-  completed?: boolean;
+  status: ChoreStatus;
   completedAt?: Date;
   pointValue?: number;
   category?: string;
