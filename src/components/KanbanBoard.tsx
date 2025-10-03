@@ -8,10 +8,15 @@ interface KanbanBoardProps {
   statusConfig: Record<ChoreStatus, { title: string; color: string }>;
 }
 
-export default function KanbanBoard({ chores, statusConfig }: KanbanBoardProps) {
+export default function KanbanBoard({
+  chores,
+  statusConfig,
+}: KanbanBoardProps) {
   const { moveChore } = useChores();
   const [draggedChore, setDraggedChore] = useState<Chore | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<ChoreStatus | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<ChoreStatus | null>(
+    null
+  );
 
   const handleDragStart = (chore: Chore) => {
     setDraggedChore(chore);
@@ -42,7 +47,7 @@ export default function KanbanBoard({ chores, statusConfig }: KanbanBoardProps) 
   };
 
   const getChoresByStatus = (status: ChoreStatus) => {
-    return chores.filter(chore => chore.status === status);
+    return chores.filter((chore) => chore.status === status);
   };
 
   return (
@@ -61,9 +66,7 @@ export default function KanbanBoard({ chores, statusConfig }: KanbanBoardProps) 
               isDraggedOver && draggedChore?.status !== status
                 ? "ring-2 ring-blue-400 ring-opacity-50 scale-105"
                 : ""
-            } ${
-              isSourceColumn ? "opacity-75" : ""
-            }`}
+            } ${isSourceColumn ? "opacity-75" : ""}`}
             onDragOver={(e) => handleDragOver(e, status as ChoreStatus)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, status as ChoreStatus)}
@@ -82,17 +85,17 @@ export default function KanbanBoard({ chores, statusConfig }: KanbanBoardProps) 
             <div className="p-4 space-y-3">
               {columnChores.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <svg 
-                    width="48" 
-                    height="48" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="1" 
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
                     className="mx-auto mb-2 opacity-50"
                   >
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
                   </svg>
                   <p className="text-sm">No chores yet</p>
                   {status === "todo" && (
@@ -100,7 +103,7 @@ export default function KanbanBoard({ chores, statusConfig }: KanbanBoardProps) 
                   )}
                 </div>
               ) : (
-                columnChores.map(chore => (
+                columnChores.map((chore) => (
                   <ChoreCard
                     key={chore.id}
                     chore={chore}

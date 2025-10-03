@@ -9,7 +9,11 @@ interface ChoreModalProps {
   onSave: () => void;
 }
 
-export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) {
+export default function ChoreModal({
+  chore,
+  onClose,
+  onSave,
+}: ChoreModalProps) {
   const { addChore, updateChore } = useChores();
   const { users } = useUsers();
 
@@ -18,11 +22,12 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
     description: chore?.description || "",
     pointValue: chore?.pointValue || 5,
     category: chore?.category || "",
-    dueDate: chore?.dueDate 
-      ? new Date(chore.dueDate).toISOString().split('T')[0] 
+    dueDate: chore?.dueDate
+      ? new Date(chore.dueDate).toISOString().split("T")[0]
       : "",
-    status: chore?.status || "todo" as ChoreStatus,
-    assignedUserIds: chore?.assignedUsers?.map(a => a.userId) || [] as string[],
+    status: chore?.status || ("todo" as ChoreStatus),
+    assignedUserIds:
+      chore?.assignedUsers?.map((a) => a.userId) || ([] as string[]),
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -44,7 +49,7 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) return;
 
     const choreData = {
@@ -54,7 +59,7 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
       category: formData.category.trim() || undefined,
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
       status: formData.status,
-      assignedUsers: formData.assignedUserIds.map(userId => ({
+      assignedUsers: formData.assignedUserIds.map((userId) => ({
         userId,
         assignedAt: new Date(),
         assignedBy: "manual" as const,
@@ -73,15 +78,22 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
   };
 
   const handleUserToggle = (userId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       assignedUserIds: prev.assignedUserIds.includes(userId)
-        ? prev.assignedUserIds.filter(id => id !== userId)
-        : [...prev.assignedUserIds, userId]
+        ? prev.assignedUserIds.filter((id) => id !== userId)
+        : [...prev.assignedUserIds, userId],
     }));
   };
 
-  const categories = ["cleaning", "kitchen", "laundry", "yard", "pets", "other"];
+  const categories = [
+    "cleaning",
+    "kitchen",
+    "laundry",
+    "yard",
+    "pets",
+    "other",
+  ];
   const statusOptions: { value: ChoreStatus; label: string }[] = [
     { value: "todo", label: "To Do" },
     { value: "in-progress", label: "In Progress" },
@@ -101,7 +113,14 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -117,13 +136,17 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, title: e.target.value }))
+                }
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.title ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="Enter chore title"
               />
-              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
             </div>
 
             {/* Description */}
@@ -133,7 +156,12 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={3}
                 placeholder="Optional description"
@@ -150,12 +178,21 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
                   type="number"
                   min="0"
                   value={formData.pointValue}
-                  onChange={(e) => setFormData(prev => ({ ...prev, pointValue: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      pointValue: parseInt(e.target.value) || 0,
+                    }))
+                  }
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.pointValue ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.pointValue && <p className="text-red-500 text-sm mt-1">{errors.pointValue}</p>}
+                {errors.pointValue && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.pointValue}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -164,11 +201,16 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
                 </label>
                 <select
                   value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select category</option>
-                  {categories.map(cat => (
+                  {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat.charAt(0).toUpperCase() + cat.slice(1)}
                     </option>
@@ -186,7 +228,12 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
                 <input
                   type="date"
                   value={formData.dueDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      dueDate: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -198,10 +245,15 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
                   </label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as ChoreStatus }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        status: e.target.value as ChoreStatus,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {statusOptions.map(option => (
+                    {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -217,7 +269,7 @@ export default function ChoreModal({ chore, onClose, onSave }: ChoreModalProps) 
                 Assign to Users
               </label>
               <div className="space-y-2">
-                {users.map(user => (
+                {users.map((user) => (
                   <label
                     key={user.id}
                     className="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-gray-50"

@@ -32,7 +32,9 @@ export default function App() {
   const [availableCalendars, setAvailableCalendars] = useState<
     SelectedCalendar[]
   >([]);
-  const [currentPage, setCurrentPage] = useState<"calendar" | "chores">("calendar");
+  const [currentPage, setCurrentPage] = useState<"calendar" | "chores">(
+    "calendar"
+  );
 
   useEffect(() => {
     // try to refresh tokens for persisted accounts (best-effort)
@@ -143,7 +145,7 @@ export default function App() {
         <ToastsProvider>
           <div className="min-h-screen bg-slate-50 flex flex-col">
             <TopBar />
-            
+
             {/* Navigation */}
             <div className="bg-white border-b">
               <div className="max-w-screen-xl mx-auto px-6">
@@ -199,35 +201,35 @@ export default function App() {
               )}
             </main>
 
-          <DebugInfo />
+            <DebugInfo />
 
-          <button
-            onClick={(e) => {
-              const btn = e.currentTarget;
-              const rect = btn.getBoundingClientRect();
-              const ripple = document.createElement("div");
-              ripple.className =
-                "absolute w-3 h-3 bg-white/30 rounded-full animate-ping pointer-events-none";
-              ripple.style.left = `${e.clientX - rect.left - 6}px`;
-              ripple.style.top = `${e.clientY - rect.top - 6}px`;
-              btn.appendChild(ripple);
-              setTimeout(() => ripple.remove(), 600);
-              // dispatch event to open modal
-              window.dispatchEvent(new CustomEvent("cr:open-new-event"));
-            }}
-            className="fixed right-8 bottom-8 w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+            <button
+              onClick={(e) => {
+                const btn = e.currentTarget;
+                const rect = btn.getBoundingClientRect();
+                const ripple = document.createElement("div");
+                ripple.className =
+                  "absolute w-3 h-3 bg-white/30 rounded-full animate-ping pointer-events-none";
+                ripple.style.left = `${e.clientX - rect.left - 6}px`;
+                ripple.style.top = `${e.clientY - rect.top - 6}px`;
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+                // dispatch event to open modal
+                window.dispatchEvent(new CustomEvent("cr:open-new-event"));
+              }}
+              className="fixed right-8 bottom-8 w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg"
             >
-              <path d="M12 5v14M5 12h14" stroke="white" />
-            </svg>
-          </button>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M12 5v14M5 12h14" stroke="white" />
+              </svg>
+            </button>
           </div>
         </ToastsProvider>
       </ChoresProvider>
