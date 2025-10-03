@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial;
+}
+
+/* Weather icon animations */
+@keyframes weather-sun-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes weather-float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes weather-rain {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+@keyframes weather-snow {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(8px) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+@keyframes weather-flash {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.weather-icon {
+  display: inline-block;
+}
+.weather-sun {
+  animation: weather-sun-rotate 12s linear infinite;
+}
+.weather-sun .core {
+  transform-origin: center;
+}
+.weather-cloud {
+  animation: weather-float 4s ease-in-out infinite;
+}
+.weather-rain .drop {
+  animation: weather-rain 800ms linear infinite;
+}
+.weather-snow .flake {
+  animation: weather-snow 1200ms linear infinite;
+}
+.weather-thunder {
+  animation: weather-flash 1.2s linear infinite;
+}
+
+/* Modal animations */
+.modal-backdrop {
+  transition: opacity 180ms ease;
+}
+.modal-backdrop.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.modal-backdrop.visible {
+  opacity: 1;
+}
+.modal-card {
+  transform-origin: center;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+.modal-card.enter {
+  transform: scale(1);
+  opacity: 1;
+}
+.modal-card.leave {
+  transform: scale(0.96);
+  opacity: 0;
+}
