@@ -12,7 +12,7 @@ export default function TimeGrid({
   const hours = dayEndHour - dayStartHour;
 
   return (
-    <div className="w-16 border-r p-2">
+    <div className="w-16 border-r border-gray-200 dark:border-gray-700 p-2">
       {/* Match WeekDay header structure */}
       <div className="flex justify-between items-center mb-2">
         <div className="font-semibold text-sm text-transparent">Time</div>{" "}
@@ -23,13 +23,16 @@ export default function TimeGrid({
       <div className="mb-2 h-12" />
 
       {/* Time labels aligned with time grid */}
-      <div className="relative border-t" style={{ height: hours * hourHeight }}>
+      <div
+        className="relative border-t border-gray-200 dark:border-gray-700"
+        style={{ height: hours * hourHeight }}
+      >
         {Array.from({ length: hours }).map((_, hi) => {
           const labelHour = dayStartHour + hi;
           return (
             <div
               key={hi}
-              className="absolute text-right pr-2 text-xs text-slate-500"
+              className="absolute text-right pr-2 text-xs text-slate-500 dark:text-slate-400"
               style={{
                 top: hi * hourHeight + 4, // Position at start of hour block
                 right: 8,

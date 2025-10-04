@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useUsers } from "../contexts/UserContext";
-import { getLastBackupTime } from "../utils/backup";
+import ThemeToggle from "./ThemeToggle";
 
 // Map Open-Meteo weathercode to simple SVG icons
 function renderWeatherIcon(code: number) {
@@ -152,17 +152,8 @@ function renderWeatherIcon(code: number) {
 }
 
 export default function TopBar() {
-  const {
-    users,
-    selectedUserId,
-    selectUser,
-    isUserSelected,
-    exportUsers,
-    importUsers,
-  } = useUsers();
+  const { users, selectedUserId, selectUser, isUserSelected } = useUsers();
   const [weather, setWeather] = useState<any>(null);
-  const [lastBackupTime, setLastBackupTime] = useState<Date | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [now, setNow] = useState(new Date());
   const [temp, setTemp] = useState<number | null>(null);
   const [weatherCode, setWeatherCode] = useState<number | null>(null);
@@ -262,57 +253,24 @@ export default function TopBar() {
     return () => clearInterval(iv);
   }, []);
 
-  // Update backup timestamp periodically
-  useEffect(() => {
-    const updateBackupTime = () => {
-      setLastBackupTime(getLastBackupTime());
-    };
-
-    updateBackupTime(); // Initial check
-    const backupCheckInterval = setInterval(updateBackupTime, 60000); // Check every minute
-
-    return () => clearInterval(backupCheckInterval);
-  }, [users]);
-
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      await importUsers(file);
-      alert("Users imported successfully!");
-    } catch (error) {
-      alert(
-        `Import failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleExport = () => {
-    exportUsers();
-  };
+  // Removed backup/import/export functionality - now in Settings page
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white shadow-sm">
-      <div className="flex items-center space-x-6">
+    <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center space-x-3 sm:space-x-6">
         <div>
-          <div className="text-lg font-semibold">Allen Family</div>
-          <div className="text-xs text-slate-500">
+          <div className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+            Allen Family
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
             {now.toLocaleDateString()}
           </div>
         </div>
-        <div className="flex items-center space-x-3 text-sm text-slate-600">
-          <div className="px-3 py-1 bg-slate-50 rounded">
+        <div className="hidden sm:flex items-center space-x-3 text-sm text-slate-600 dark:text-slate-300">
+          <div className="px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded">
             {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
           </div>
-          <div className="px-3 py-1 bg-slate-50 rounded flex items-center space-x-2">
+          <div className="px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded flex items-center space-x-2">
             {/* weather icon */}
             <div className="w-5 h-5 flex items-center justify-center text-slate-700">
               {tempLoading ? (
@@ -356,24 +314,24 @@ export default function TopBar() {
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-4">
+        <div className="flex items-center space-x-1 sm:space-x-3 overflow-x-auto pb-1">
           {/* All Users button */}
           <button
             onClick={() => selectUser(null)}
-            className={`flex flex-col items-center text-xs transition-all duration-200 p-2 rounded-lg ${
+            className={`flex flex-col sm:flex-row items-center text-xs transition-all duration-200 p-1 sm:p-2 rounded-lg whitespace-nowrap ${
               selectedUserId === null
                 ? "bg-blue-100 shadow-sm"
                 : "hover:bg-gray-50"
             }`}
             title="Show all users"
           >
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold bg-gray-500">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold bg-gray-500">
                 All
               </div>
               <div
-                className={`text-sm ${
+                className={`text-xs sm:text-sm hidden sm:block ${
                   selectedUserId === null
                     ? "text-blue-700 font-semibold"
                     : "text-slate-700"
@@ -390,26 +348,38 @@ export default function TopBar() {
               onClick={() =>
                 selectUser(isUserSelected(user.id) ? null : user.id)
               }
-              className={`flex flex-col items-center text-xs transition-all duration-200 p-2 rounded-lg ${
+              className={`flex flex-col items-center text-xs transition-all duration-200 p-1 sm:p-2 rounded-lg whitespace-nowrap ${
                 isUserSelected(user.id)
                   ? "bg-blue-100 shadow-sm transform scale-105"
                   : "hover:bg-gray-50 hover:scale-102"
               }`}
               title={`Filter by ${user.name}`}
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 sm:space-x-2">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold ${
+                  className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center overflow-hidden ${
                     isUserSelected(user.id)
-                      ? "ring-2 ring-blue-400 ring-offset-2"
+                      ? "ring-1 sm:ring-2 ring-blue-400 ring-offset-1 sm:ring-offset-2"
                       : ""
                   }`}
-                  style={{ backgroundColor: user.color }}
+                  style={{
+                    backgroundColor: user.avatar ? "transparent" : user.color,
+                  }}
                 >
-                  {user.name[0]}
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-xs sm:text-sm font-semibold">
+                      {user.name[0]}
+                    </span>
+                  )}
                 </div>
                 <div
-                  className={`text-sm ${
+                  className={`text-xs sm:text-sm hidden sm:block ${
                     isUserSelected(user.id)
                       ? "text-blue-700 font-semibold"
                       : "text-slate-700"
@@ -432,67 +402,7 @@ export default function TopBar() {
             </button>
           ))}
         </div>
-
-        {/* Backup Controls */}
-        <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
-          <button
-            onClick={handleExport}
-            className="px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-sm flex items-center space-x-1"
-            title="Export user data as backup file"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7,10 12,15 17,10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span>Export</span>
-          </button>
-
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm flex items-center space-x-1"
-            title="Import user data from backup file"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17,8 12,3 7,8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <span>Import</span>
-          </button>
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImport}
-            accept=".json"
-            className="hidden"
-          />
-
-          {lastBackupTime && (
-            <div
-              className="text-xs text-gray-500"
-              title={`Last backup: ${lastBackupTime.toLocaleString()}`}
-            >
-              Auto-saved{" "}
-              {Math.round((Date.now() - lastBackupTime.getTime()) / 60000)}m ago
-            </div>
-          )}
-        </div>
+        <ThemeToggle />
       </div>
     </div>
   );

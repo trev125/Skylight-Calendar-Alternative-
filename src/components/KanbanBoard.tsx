@@ -60,7 +60,7 @@ export default function KanbanBoard({
         return (
           <div
             key={status}
-            className={`min-h-[600px] rounded-lg border-2 transition-all duration-200 ${
+            className={`min-h-[600px] rounded-lg border-2 transition-all duration-200 bg-white dark:bg-gray-800 ${
               config.color
             } ${
               isDraggedOver && draggedChore?.status !== status
@@ -72,10 +72,12 @@ export default function KanbanBoard({
             onDrop={(e) => handleDrop(e, status as ChoreStatus)}
           >
             {/* Column Header */}
-            <div className="p-4 border-b border-gray-200 bg-white/50 rounded-t-lg">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 rounded-t-lg">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">{config.title}</h3>
-                <span className="bg-white/60 text-gray-600 text-sm px-2 py-1 rounded-full">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {config.title}
+                </h3>
+                <span className="bg-white/60 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 text-sm px-2 py-1 rounded-full">
                   {columnChores.length}
                 </span>
               </div>
@@ -84,7 +86,7 @@ export default function KanbanBoard({
             {/* Column Content */}
             <div className="p-4 space-y-3">
               {columnChores.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <svg
                     width="48"
                     height="48"
@@ -117,7 +119,7 @@ export default function KanbanBoard({
 
             {/* Drop Zone Indicator */}
             {isDraggedOver && draggedChore?.status !== status && (
-              <div className="mx-4 mb-4 border-2 border-dashed border-blue-400 rounded-lg p-4 bg-blue-50 text-center text-blue-600 font-medium">
+              <div className="mx-4 mb-4 border-2 border-dashed border-blue-400 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 text-center text-blue-600 dark:text-blue-400 font-medium">
                 Drop here to move to {config.title}
               </div>
             )}

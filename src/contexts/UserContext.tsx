@@ -18,29 +18,33 @@ const DEFAULT_USERS: User[] = [
   {
     id: "dad",
     name: "Dad",
-    email: "trevorderp204@gmail.com",
+    email: "tallen@nav.com,trev125@gmail.com",
     color: "#6EE7B7", // emerald-300
+    avatar: "/imgs/dad.jpg",
     progress: 40,
-  },
-  {
-    id: "ella",
-    name: "Ella",
-    email: "trev125@gmail.com",
-    color: "#F9A8D4", // pink-300
-    progress: 100,
-  },
-  {
-    id: "harper",
-    name: "Harper",
-    email: "harper@example.com",
-    color: "#C4B5FD", // violet-300
-    progress: 75,
   },
   {
     id: "mom",
     name: "Mom",
-    email: "mom@example.com",
+    email: "mranda.taylor@gmail.com",
     color: "#FCA5A5", // red-300
+    avatar: "/imgs/mom.jpg",
+    progress: 100,
+  },
+  {
+    id: "shay",
+    name: "Shay",
+    email: "shay@example.com",
+    color: "#C4B5FD", // violet-300
+    avatar: "/imgs/shay.jpg",
+    progress: 75,
+  },
+  {
+    id: "nora",
+    name: "Nora",
+    email: "nora@example.com",
+    color: "#F9A8D4", // pink-300
+    avatar: "/imgs/nora.jpg",
     progress: 100,
   },
 ];

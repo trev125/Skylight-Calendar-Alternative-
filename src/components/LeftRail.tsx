@@ -10,77 +10,94 @@ import {
 } from "@heroicons/react/24/outline";
 import React from "react";
 
-export default function LeftRail() {
+interface LeftRailProps {
+  currentPage: string;
+  onPageChange: (page: string) => void;
+}
+
+export default function LeftRail({ currentPage, onPageChange }: LeftRailProps) {
   const items = [
-    "Calendar",
-    "Chores",
-    "Rewards",
-    "Meals",
-    "Photos",
-    "Lists",
-    "Sleep",
-    "Settings",
+    { key: "calendar", label: "Calendar", functional: true },
+    { key: "chores", label: "Chores", functional: true },
+    { key: "rewards", label: "Rewards", functional: false },
+    { key: "meals", label: "Meals", functional: false },
+    { key: "photos", label: "Photos", functional: false },
+    { key: "lists", label: "Lists", functional: false },
+    { key: "sleep", label: "Sleep", functional: false },
+    { key: "settings", label: "Settings", functional: true },
   ];
 
-  const icons: Record<string, JSX.Element> = {
-    Calendar: <CalendarDaysIcon className="w-5 h-5 text-indigo-500" />,
-    Chores: <SparklesIcon className="w-5 h-5 text-slate-500" />,
-    Rewards: <StarIcon className="w-5 h-5 text-yellow-400" />,
-    Meals: <TruckIcon className="w-5 h-5 text-rose-500" />,
-    // Heroicons doesn't reliably include a fork+knife in all versions; use a small inline SVG fallback for Meals
-    // Meals: (
-    //   <svg
-    //     xmlns="http://www.w3.org/2000/svg"
-    //     viewBox="0 0 24 24"
-    //     fill="none"
-    //     stroke="currentColor"
-    //     className="w-5 h-5 text-rose-500"
-    //   >
-    //     <path
-    //       strokeLinecap="round"
-    //       strokeLinejoin="round"
-    //       strokeWidth={1.5}
-    //       d="M7 3v6M9 3v6M7 9h2"
-    //     />
-    //     <path
-    //       strokeLinecap="round"
-    //       strokeLinejoin="round"
-    //       strokeWidth={1.5}
-    //       d="M14 3v12"
-    //     />
-    //     <path
-    //       strokeLinecap="round"
-    //       strokeLinejoin="round"
-    //       strokeWidth={1.5}
-    //       d="M18 5l-2 2 2 2"
-    //     />
-    //   </svg>
-    // ),
-    Photos: <PhotoIcon className="w-5 h-5 text-violet-400" />,
-    Lists: <ListBulletIcon className="w-5 h-5 text-sky-400" />,
-    Sleep: <MoonIcon className="w-5 h-5 text-slate-400" />,
-    Settings: <Cog6ToothIcon className="w-5 h-5 text-slate-400" />,
+  const getIcon = (key: string, isActive: boolean) => {
+    const activeClass = isActive ? "text-blue-600" : "";
+    const baseClass = "w-5 h-5";
+
+    switch (key) {
+      case "calendar":
+        return (
+          <CalendarDaysIcon
+            className={`${baseClass} ${
+              isActive ? "text-blue-600" : "text-indigo-500"
+            }`}
+          />
+        );
+      case "chores":
+        return (
+          <SparklesIcon
+            className={`${baseClass} ${
+              isActive ? "text-blue-600" : "text-slate-500"
+            }`}
+          />
+        );
+      case "rewards":
+        return <StarIcon className={`${baseClass} text-yellow-400`} />;
+      case "meals":
+        return <TruckIcon className={`${baseClass} text-rose-500`} />;
+      case "photos":
+        return <PhotoIcon className={`${baseClass} text-violet-400`} />;
+      case "lists":
+        return <ListBulletIcon className={`${baseClass} text-sky-400`} />;
+      case "sleep":
+        return <MoonIcon className={`${baseClass} text-slate-400`} />;
+      case "settings":
+        return <Cog6ToothIcon className={`${baseClass} text-slate-400`} />;
+      default:
+        return <CalendarDaysIcon className={`${baseClass} text-slate-400`} />;
+    }
   };
 
   return (
-    <aside className="w-20 flex-shrink-0 bg-white border-r p-3 flex flex-col items-center">
+    <aside className="w-20 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-3 flex flex-col items-center">
       <div className="mb-4">
         <div className="w-10 h-10 rounded bg-blue-600 text-white flex items-center justify-center font-bold">
           S
         </div>
       </div>
       <nav className="flex-1 w-full flex flex-col items-center gap-2">
-        {items.map((it) => (
-          <button
-            key={it}
-            className="w-full flex flex-col items-center text-xs text-slate-700 hover:bg-slate-50 rounded px-1 py-2 transition-colors duration-150"
-          >
-            <div className="w-8 h-8 rounded flex items-center justify-center mb-1">
-              {icons[it]}
-            </div>
-            <div className="text-[11px] leading-3">{it}</div>
-          </button>
-        ))}
+        {items.map((item) => {
+          const isActive = currentPage === item.key;
+          const isClickable = item.functional;
+
+          return (
+            <button
+              key={item.key}
+              onClick={() => isClickable && onPageChange(item.key)}
+              disabled={!isClickable}
+              className={`w-full flex flex-col items-center text-xs transition-colors duration-150 rounded px-1 py-2 ${
+                isActive
+                  ? "bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
+                  : isClickable
+                  ? "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                  : "text-slate-400 dark:text-slate-500 cursor-not-allowed"
+              }`}
+              title={!isClickable ? "Coming soon" : undefined}
+            >
+              <div className="w-8 h-8 rounded flex items-center justify-center mb-1">
+                {getIcon(item.key, isActive)}
+              </div>
+              <div className="text-[11px] leading-3">{item.label}</div>
+            </button>
+          );
+        })}
       </nav>
     </aside>
   );

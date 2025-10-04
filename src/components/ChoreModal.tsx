@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Chore, ChoreStatus } from "../types/user";
 import { useChores } from "../contexts/ChoresContext";
 import { useUsers } from "../contexts/UserContext";
+import { getUserAvatar } from "../utils/userAssignments";
 
 interface ChoreModalProps {
   chore?: Chore; // If provided, we're editing; otherwise, we're creating
@@ -103,15 +104,15 @@ export default function ChoreModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               {chore ? "Edit Chore" : "Add New Chore"}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
             >
               <svg
                 width="24"
@@ -130,7 +131,7 @@ export default function ChoreModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Title *
               </label>
               <input
@@ -151,7 +152,7 @@ export default function ChoreModal({
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
               <textarea
@@ -171,7 +172,7 @@ export default function ChoreModal({
             {/* Points and Category Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Points
                 </label>
                 <input
@@ -196,7 +197,7 @@ export default function ChoreModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Category
                 </label>
                 <select
@@ -222,7 +223,7 @@ export default function ChoreModal({
             {/* Due Date and Status Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Due Date
                 </label>
                 <input
@@ -240,7 +241,7 @@ export default function ChoreModal({
 
               {chore && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Status
                   </label>
                   <select
@@ -265,7 +266,7 @@ export default function ChoreModal({
 
             {/* Assign Users */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Assign to Users
               </label>
               <div className="space-y-2">
@@ -281,12 +282,26 @@ export default function ChoreModal({
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                      style={{ backgroundColor: user.color }}
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold overflow-hidden"
+                      style={{
+                        backgroundColor: getUserAvatar(user.id, users)
+                          ? "transparent"
+                          : user.color,
+                      }}
                     >
-                      {user.name[0]}
+                      {getUserAvatar(user.id, users) ? (
+                        <img
+                          src={getUserAvatar(user.id, users)}
+                          alt={user.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{user.name[0]}</span>
+                      )}
                     </div>
-                    <span className="text-sm text-gray-700">{user.name}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {user.name}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -297,7 +312,7 @@ export default function ChoreModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
                 Cancel
               </button>

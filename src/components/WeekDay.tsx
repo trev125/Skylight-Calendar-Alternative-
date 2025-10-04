@@ -45,6 +45,97 @@ function pastelColorFromString(s: string) {
   return `hsl(${h} ${sVal}% ${l}%)`;
 }
 
+// Helper function to calculate event layout with collision detection
+function calculateEventLayout(
+  events: Event[],
+  dayStartHour: number,
+  hourHeight: number
+) {
+  interface EventPosition {
+    event: Event;
+    startTime: Date;
+    endTime: Date;
+    top: number;
+    height: number;
+    duration: number;
+    column: number;
+    totalColumns: number;
+    width: number;
+    left: number;
+  }
+
+  // First pass: calculate basic positions
+  const positions: EventPosition[] = events
+    .map((ev: Event) => {
+      const sStr = ev.start?.dateTime;
+      const eStr = ev.end?.dateTime;
+      const s = sStr ? new Date(sStr) : null;
+      const e = eStr ? new Date(eStr) : null;
+      if (!s || !e) return null;
+
+      const startOffsetH = s.getHours() + s.getMinutes() / 60 - dayStartHour;
+      const durationH = (e.getTime() - s.getTime()) / (1000 * 60 * 60);
+      const top = Math.max(0, startOffsetH * hourHeight);
+      const height = Math.max(18, durationH * hourHeight);
+      const duration = e.getTime() - s.getTime();
+
+      return {
+        event: ev,
+        startTime: s,
+        endTime: e,
+        top,
+        height,
+        duration,
+        column: 0,
+        totalColumns: 1,
+        width: 100,
+        left: 0,
+      };
+    })
+    .filter(Boolean) as EventPosition[];
+
+  // Second pass: detect overlaps and assign columns
+  const processedEvents = new Set<number>();
+
+  positions.forEach((pos, i) => {
+    if (processedEvents.has(i)) return;
+
+    // Find all overlapping events including this one
+    const overlappingGroup: EventPosition[] = [pos];
+
+    for (let j = i + 1; j < positions.length; j++) {
+      if (processedEvents.has(j)) continue;
+
+      const other = positions[j];
+      // Check if time ranges overlap
+      if (pos.startTime < other.endTime && pos.endTime > other.startTime) {
+        overlappingGroup.push(other);
+        processedEvents.add(j);
+      }
+    }
+
+    processedEvents.add(i);
+
+    // Sort group by start time
+    overlappingGroup.sort(
+      (a, b) => a.startTime.getTime() - b.startTime.getTime()
+    );
+
+    // Assign positions
+    const totalColumns = overlappingGroup.length;
+    const columnWidth = totalColumns > 1 ? 95 / totalColumns : 100; // Leave 5% gap when overlapping
+
+    overlappingGroup.forEach((event, columnIndex) => {
+      event.column = columnIndex;
+      event.totalColumns = totalColumns;
+      event.width = columnWidth;
+      event.left = columnIndex * columnWidth;
+    });
+  });
+
+  return positions;
+}
+
 export default function WeekDay({
   day,
   dayIndex,
@@ -203,7 +294,7 @@ export default function WeekDay({
     <div className="p-2">
       {/* Day header */}
       <div className="flex justify-between items-center mb-2">
-        <div className="font-semibold text-sm">
+        <div className="font-semibold text-sm text-gray-900 dark:text-white">
           {day.toLocaleDateString(undefined, {
             weekday: "short",
             month: "short",
@@ -219,7 +310,7 @@ export default function WeekDay({
             e.setHours(e.getHours() + 1);
             onQuickCreate(s, e, selectedCalendars[0]?.calendarId);
           }}
-          className="text-xs px-2 py-0.5 bg-green-100 hover:bg-green-200 rounded transition-colors"
+          className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 text-green-800 dark:text-green-100 rounded transition-colors"
         >
           +
         </button>
@@ -275,19 +366,9 @@ export default function WeekDay({
         ))}
 
         {/* Timed events */}
-        {dayTimed.map((ev: Event) => {
-          const sStr = ev.start?.dateTime;
-          const eStr = ev.end?.dateTime;
-          const s = sStr ? new Date(sStr) : null;
-          const e = eStr ? new Date(eStr) : null;
-          if (!s || !e) return null;
-
-          const startOffsetH =
-            s.getHours() + s.getMinutes() / 60 - dayStartHour;
-          const durationH = (e.getTime() - s.getTime()) / (1000 * 60 * 60);
-          const top = Math.max(0, startOffsetH * hourHeight);
-          const height = Math.max(18, durationH * hourHeight);
-          const duration = e.getTime() - s.getTime();
+        {calculateEventLayout(dayTimed, dayStartHour, hourHeight).map((pos) => {
+          const ev = pos.event;
+          const { top, height, duration, width, left } = pos;
 
           const isDraggable = !!(ev.start?.dateTime && ev.end?.dateTime);
           const isBeingDragged =
@@ -327,6 +408,8 @@ export default function WeekDay({
               event={ev}
               top={adjustedTop}
               height={adjustedHeight}
+              left={left}
+              width={width}
               isDraggable={isDraggable}
               isBeingDragged={isBeingDragged}
               isDisabled={isDisabled}

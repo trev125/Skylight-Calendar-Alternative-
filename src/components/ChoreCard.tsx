@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Chore } from "../types/user";
 import { useUsers } from "../contexts/UserContext";
 import { useChores } from "../contexts/ChoresContext";
-import { getUserName, getUserColor } from "../utils/userAssignments";
+import {
+  getUserName,
+  getUserColor,
+  getUserAvatar,
+} from "../utils/userAssignments";
 import ChoreModal from "./ChoreModal";
 
 interface ChoreCardProps {
@@ -56,7 +60,10 @@ export default function ChoreCard({
     if (diffDays === 0) return { text: "Due today", color: "text-orange-600" };
     if (diffDays === 1)
       return { text: "Due tomorrow", color: "text-yellow-600" };
-    return { text: `Due in ${diffDays} days`, color: "text-gray-600" };
+    return {
+      text: `Due in ${diffDays} days`,
+      color: "text-gray-600 dark:text-gray-400",
+    };
   };
 
   const dueDateInfo = chore.dueDate
@@ -69,7 +76,7 @@ export default function ChoreCard({
         draggable
         onDragStart={handleDragStart}
         onDragEnd={onDragEnd}
-        className={`bg-white rounded-lg p-4 shadow-sm border border-gray-200 cursor-grab active:cursor-grabbing transition-all duration-200 hover:shadow-md group relative ${
+        className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 cursor-grab active:cursor-grabbing transition-all duration-200 hover:shadow-md group relative ${
           isDragging ? "opacity-50 rotate-2 scale-105 shadow-lg" : ""
         }`}
         onMouseEnter={() => setShowActions(true)}
@@ -116,11 +123,13 @@ export default function ChoreCard({
         )}
 
         {/* Chore Title */}
-        <h4 className="font-medium text-gray-900 mb-2 pr-8">{chore.title}</h4>
+        <h4 className="font-medium text-gray-900 dark:text-white mb-2 pr-8">
+          {chore.title}
+        </h4>
 
         {/* Description */}
         {chore.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
             {chore.description}
           </p>
         )}
@@ -154,17 +163,26 @@ export default function ChoreCard({
             {chore.assignedUsers?.slice(0, 3).map((assignment, index) => {
               const userName = getUserName(assignment.userId, users);
               const userColor = getUserColor(assignment.userId, users);
+              const userAvatar = getUserAvatar(assignment.userId, users);
               return (
                 <div
                   key={assignment.userId}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold border-2 border-white"
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold border-2 border-white overflow-hidden"
                   style={{
-                    backgroundColor: userColor,
+                    backgroundColor: userAvatar ? "transparent" : userColor,
                     zIndex: chore.assignedUsers!.length - index,
                   }}
                   title={userName}
                 >
-                  {userName[0]?.toUpperCase() || "U"}
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={userName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{userName[0]?.toUpperCase() || "U"}</span>
+                  )}
                 </div>
               );
             })}
@@ -196,7 +214,7 @@ export default function ChoreCard({
         {/* Category Tag */}
         {chore.category && (
           <div className="mt-2">
-            <span className="inline-block bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+            <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded text-xs">
               {chore.category}
             </span>
           </div>

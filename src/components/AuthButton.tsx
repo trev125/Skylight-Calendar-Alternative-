@@ -1,5 +1,10 @@
 import { useEffect } from "react";
 import { useToasts } from "./Toasts";
+import {
+  getSessionAccounts,
+  addSessionAccount,
+  getValidSessionToken,
+} from "../utils/sessionAuth";
 
 type Account = { token: string; email?: string; name?: string };
 
@@ -92,6 +97,9 @@ export default function AuthButton({ onAddAccount }: Props) {
       return;
     }
 
+    // REMOVED: Session restoration is now handled by AutoRestoreAuth component
+    // This button should only handle NEW authentication, not restore existing sessions
+
     // @ts-ignore
     const tokenClient = window.google?.accounts?.oauth2?.initTokenClient({
       client_id: clientId,
@@ -124,6 +132,9 @@ export default function AuthButton({ onAddAccount }: Props) {
         }
 
         const accessToken = resp.access_token;
+        const refreshToken = resp.refresh_token;
+        const expiresIn = resp.expires_in || 3600; // Default to 1 hour
+
         try {
           const u = await fetch(
             "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -131,10 +142,24 @@ export default function AuthButton({ onAddAccount }: Props) {
               headers: { Authorization: `Bearer ${accessToken}` },
             }
           ).then((r) => r.json());
+
+          // Store account in session storage for persistence
+          addSessionAccount({
+            token: accessToken,
+            email: u.email,
+            name: u.name,
+          });
+
           onAddAccount({ token: accessToken, email: u.email, name: u.name });
+          if (toasts)
+            toasts.show(`Successfully signed in as ${u.email}`, "success");
         } catch (err) {
           console.error("Failed to fetch userinfo", err);
           // fallback: still add account with token only
+          addSessionAccount({
+            token: accessToken,
+          });
+
           onAddAccount({ token: accessToken });
         }
       },
@@ -169,8 +194,12 @@ export default function AuthButton({ onAddAccount }: Props) {
         origin: window.location.origin,
       });
       // prompt the user to select an account and grant the scopes
+      // Use 'consent' prompt to ensure we get refresh tokens
       // @ts-ignore
-      tokenClient.requestAccessToken({ prompt: "select_account" });
+      tokenClient.requestAccessToken({
+        prompt: "select_account consent",
+        include_granted_scopes: true,
+      });
     } catch (err: any) {
       console.error("Error requesting Google access token", err);
       if (toasts)

@@ -65,12 +65,14 @@ export default function MonthView({
           return (
             <div
               key={i}
-              className={`bg-white min-h-[100px] p-3 ${
+              className={`bg-white min-h-[80px] sm:min-h-[100px] p-2 sm:p-3 ${
                 isCurrentMonth ? "" : "bg-slate-50 text-slate-400"
               }`}
             >
-              <div className="flex justify-between items-start mb-2">
-                <div className="text-sm font-medium">{day.getDate()}</div>
+              <div className="flex justify-between items-start mb-1 sm:mb-2">
+                <div className="text-xs sm:text-sm font-medium">
+                  {day.getDate()}
+                </div>
                 <button
                   title="Quick create"
                   onClick={(ev) => {

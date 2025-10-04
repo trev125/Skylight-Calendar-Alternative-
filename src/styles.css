@@ -127,3 +127,30 @@ body {
   transform: scale(0.96);
   opacity: 0;
 }
+
+/* Responsive optimizations */
+@media (max-width: 640px) {
+  /* Mobile optimizations */
+  .modal-card {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 600px) {
+  /* Small touch screen optimizations (1024x600) */
+  body {
+    font-size: 14px;
+  }
+
+  /* Compact spacing for small screens */
+  .compact-spacing {
+    padding: 0.25rem;
+  }
+
+  /* Smaller modal on small touch screens */
+  .modal-card {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+}

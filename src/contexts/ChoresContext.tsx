@@ -30,7 +30,7 @@ const MOCK_CHORES: Chore[] = [
     category: "cleaning",
     dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
     assignedUsers: [
-      { userId: "ella", assignedAt: new Date(), assignedBy: "manual" },
+      { userId: "nora", assignedAt: new Date(), assignedBy: "manual" },
     ],
     createdAt: new Date(),
   },
@@ -42,7 +42,7 @@ const MOCK_CHORES: Chore[] = [
     pointValue: 3,
     category: "kitchen",
     assignedUsers: [
-      { userId: "harper", assignedAt: new Date(), assignedBy: "manual" },
+      { userId: "shay", assignedAt: new Date(), assignedBy: "manual" },
     ],
     createdAt: new Date(),
   },

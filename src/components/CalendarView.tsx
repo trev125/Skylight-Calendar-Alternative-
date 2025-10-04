@@ -36,7 +36,13 @@ export default function CalendarView({
   availableCalendars,
 }: Props) {
   const { selectedUserId, users } = useUsers();
-  const [mode, setMode] = useState<"month" | "week">("week");
+  // Default to 3-day view on mobile, week view on desktop
+  const [mode, setMode] = useState<"month" | "week" | "3day">(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 1050 ? "3day" : "week";
+    }
+    return "week";
+  });
   const [cursor, setCursor] = useState(new Date());
   const [events, setEvents] = useState<UserEvent[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -62,7 +68,14 @@ export default function CalendarView({
       const gridEnd = new Date(gridStart);
       gridEnd.setDate(gridEnd.getDate() + 42); // 6 weeks
       timeMax = gridEnd;
+    } else if (mode === "3day") {
+      // 3-day view: start from cursor date
+      timeMin = new Date(cursor);
+      timeMin.setHours(0, 0, 0, 0);
+      timeMax = new Date(timeMin);
+      timeMax.setDate(timeMax.getDate() + 3);
     } else {
+      // week view
       const weekStart = startOfWeek(cursor);
       timeMin = weekStart;
       const weekEnd = new Date(weekStart);
@@ -302,34 +315,39 @@ export default function CalendarView({
   };
 
   return (
-    <section className="space-y-4">
-      <CalendarControls
-        mode={mode}
-        cursor={cursor}
-        selectedCalendars={selectedCalendars}
-        onModeChange={setMode}
-        onCursorChange={setCursor}
-        onNewEvent={handleNewEvent}
-      />
+    <section className="p-6">
+      <div className="space-y-6">
+        <CalendarControls
+          mode={mode}
+          cursor={cursor}
+          selectedCalendars={selectedCalendars}
+          onModeChange={setMode}
+          onCursorChange={setCursor}
+          onNewEvent={handleNewEvent}
+        />
 
-      {mode === "month" ? (
-        <MonthView
-          cursor={cursor}
-          events={filteredEvents}
-          selectedCalendars={selectedCalendars}
-          onEventEdit={handleEventEdit}
-          onQuickCreate={handleQuickCreate}
-        />
-      ) : (
-        <WeekView
-          cursor={cursor}
-          events={filteredEvents}
-          selectedCalendars={selectedCalendars}
-          onEventEdit={handleEventEdit}
-          onQuickCreate={handleQuickCreate}
-          onEventUpdate={handleEventUpdate}
-        />
-      )}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {mode === "month" ? (
+            <MonthView
+              cursor={cursor}
+              events={filteredEvents}
+              selectedCalendars={selectedCalendars}
+              onEventEdit={handleEventEdit}
+              onQuickCreate={handleQuickCreate}
+            />
+          ) : (
+            <WeekView
+              cursor={cursor}
+              events={filteredEvents}
+              selectedCalendars={selectedCalendars}
+              onEventEdit={handleEventEdit}
+              onQuickCreate={handleQuickCreate}
+              onEventUpdate={handleEventUpdate}
+              numDays={mode === "3day" ? 3 : 7}
+            />
+          )}
+        </div>
+      </div>
 
       {modalOpen && (
         <EventModal

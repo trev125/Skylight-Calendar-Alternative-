@@ -7,6 +7,8 @@ import { Event } from "../types/calendar";
 export function eventToUserEvent(event: Event): UserEvent {
   return {
     ...event,
+    // Default empty titles to "Busy"
+    summary: event.summary || "Busy",
     assignedUsers: [],
     createdAt: new Date(),
   };
@@ -130,6 +132,17 @@ export function getUserColor(userId: string, users: User[]): string {
 export function getUserName(userId: string, users: User[]): string {
   const user = users.find((u) => u.id === userId);
   return user?.name || "Unknown User";
+}
+
+/**
+ * Get user avatar for display purposes
+ */
+export function getUserAvatar(
+  userId: string,
+  users: User[]
+): string | undefined {
+  const user = users.find((u) => u.id === userId);
+  return user?.avatar;
 }
 
 /**

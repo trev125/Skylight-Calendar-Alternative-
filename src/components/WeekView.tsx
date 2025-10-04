@@ -15,6 +15,7 @@ type Props = {
     calendarId: string,
     updates: any
   ) => Promise<void>;
+  numDays?: number; // Allow customizing the number of days (default 7)
 };
 
 function startOfWeek(d: Date) {
@@ -32,12 +33,19 @@ export default function WeekView({
   onEventEdit,
   onQuickCreate,
   onEventUpdate,
+  numDays = 7,
 }: Props) {
-  const weekStart = startOfWeek(cursor);
+  // For 3-day view, start from cursor date instead of week start
+  const startDate = numDays === 3 ? new Date(cursor) : startOfWeek(cursor);
+  if (numDays === 3) {
+    startDate.setHours(0, 0, 0, 0);
+  }
   const dayStartHour = 6;
   const dayEndHour = 21;
   const hours = dayEndHour - dayStartHour;
-  const hourHeight = 60;
+  // Smaller hour height on mobile for better fit
+  const hourHeight =
+    typeof window !== "undefined" && window.innerWidth < 640 ? 45 : 60;
   const containerHeight = hours * hourHeight;
 
   const [dragState, setDragState] = useState<{
@@ -57,7 +65,7 @@ export default function WeekView({
   const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
 
   return (
-    <div className="bg-white rounded shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded shadow-sm">
       <div className="flex">
         {/* Left timeline */}
         <TimeGrid
@@ -67,9 +75,12 @@ export default function WeekView({
         />
 
         {/* Days columns */}
-        <div className="flex-1 grid grid-cols-7 divide-x">
-          {Array.from({ length: 7 }).map((_, dayIndex) => {
-            const day = new Date(weekStart);
+        <div
+          className={`flex-1 grid divide-x divide-gray-200 dark:divide-gray-700`}
+          style={{ gridTemplateColumns: `repeat(${numDays}, 1fr)` }}
+        >
+          {Array.from({ length: numDays }).map((_, dayIndex) => {
+            const day = new Date(startDate);
             day.setDate(day.getDate() + dayIndex);
 
             return (
@@ -147,7 +158,7 @@ export default function WeekView({
                         15;
 
                       // Calculate new start date based on target day
-                      const targetDay = weekStart;
+                      const targetDay = startDate;
                       targetDay.setDate(
                         targetDay.getDate() + currentDragState.currentDayIndex
                       );
@@ -174,7 +185,7 @@ export default function WeekView({
                         Math.round(((startHourFloat - hoursPart) * 60) / 15) *
                         15;
 
-                      const targetDay = new Date(weekStart);
+                      const targetDay = new Date(startDate);
                       targetDay.setDate(
                         targetDay.getDate() + currentDragState.currentDayIndex
                       );
@@ -198,7 +209,7 @@ export default function WeekView({
                       const mins =
                         Math.round(((endHourFloat - hoursPart) * 60) / 15) * 15;
 
-                      const targetDay = new Date(weekStart);
+                      const targetDay = new Date(startDate);
                       targetDay.setDate(
                         targetDay.getDate() + currentDragState.currentDayIndex
                       );
